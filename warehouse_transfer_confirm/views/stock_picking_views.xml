@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Inherit Stock Picking Form View -->
+    <record id="view_picking_form_transit_inherit" model="ir.ui.view">
+        <field name="name">stock.picking.form.transit.inherit</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.view_picking_form"/>
+        <field name="arch" type="xml">
+            <!-- Header buttons -->
+            <xpath expr="//header" position="inside">
+                <field name="is_interwarehouse" invisible="1"/>
+                <field name="can_user_confirm_receipt" invisible="1"/>
+                
+                <!-- Dispatch Button (Main Store / Dispatcher) -->
+                <button name="action_dispatch_transit" string="Dispatch to Warehouse" type="object"
+                        class="btn-primary" icon="fa-truck"
+                        invisible="not is_interwarehouse or transfer_stage != 'draft' or state in ['done', 'cancel']"/>
+
+                <!-- Confirm Received Button (Destination Warehouse) -->
+                <button name="action_confirm_received" string="Confirm Received (Add to Inventory)" type="object"
+                        class="btn-success" icon="fa-check-circle"
+                        invisible="transfer_stage != 'in_transit' or not can_user_confirm_receipt"/>
+            </xpath>
+
+            <!-- Statusbar extension -->
+            <xpath expr="//header/field[@name='state']" position="before">
+                <field name="transfer_stage" widget="statusbar" statusbar_visible="draft,in_transit,received"
+                       invisible="not is_interwarehouse"/>
+            </xpath>
+
+            <!-- Alert Banner inside sheet -->
+            <xpath expr="//sheet" position="before">
+                <div class="alert alert-warning d-flex align-items-center justify-content-between p-3 mb-3 shadow-sm rounded"
+                     role="alert" invisible="transfer_stage != 'in_transit'">
+                    <div>
+                        <i class="fa fa-truck fa-2x me-3 text-warning" title="In Transit"/>
+                        <span>
+                            <strong>In-Transit:</strong> Products have left the source warehouse and are currently in transit.
+                            They will <strong>NOT</strong> appear in the destination warehouse inventory until confirmed.
+                        </span>
+                    </div>
+                    <button name="action_confirm_received" type="object"
+                            string="Confirm Received"
+                            class="btn btn-success btn-lg" icon="fa-check-circle"
+                            invisible="not can_user_confirm_receipt"/>
+                </div>
+
+                <div class="alert alert-success d-flex align-items-center p-2 mb-2 shadow-sm rounded"
+                     role="alert" invisible="transfer_stage != 'received'">
+                    <i class="fa fa-check-circle fa-lg me-2 text-success" title="Confirmed"/>
+                    <span><strong>Receipt Confirmed:</strong> Products are now added to the warehouse inventory.</span>
+                </div>
+            </xpath>
+
+            <!-- Warehouse info fields in form -->
+            <xpath expr="//field[@name='origin']" position="after">
+                <field name="source_warehouse_id" readonly="1" invisible="not is_interwarehouse"/>
+                <field name="dest_warehouse_id" readonly="1" invisible="not is_interwarehouse"/>
+                <field name="transit_picking_id" readonly="1" invisible="not transit_picking_id"/>
+                <field name="origin_dispatch_id" readonly="1" invisible="not origin_dispatch_id"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- In-Transit Pickings List View -->
+    <record id="view_picking_tree_in_transit" model="ir.ui.view">
+        <field name="name">stock.picking.tree.in.transit</field>
+        <field name="model">stock.picking</field>
+        <field name="arch" type="xml">
+            <list string="In-Transit Warehouse Shipments" decoration-warning="transfer_stage == 'in_transit'" decoration-success="transfer_stage == 'received'">
+                <field name="name"/>
+                <field name="source_warehouse_id"/>
+                <field name="dest_warehouse_id"/>
+                <field name="location_dest_id"/>
+                <field name="scheduled_date"/>
+                <field name="origin"/>
+                <field name="transfer_stage" widget="badge" decoration-warning="transfer_stage == 'in_transit'" decoration-success="transfer_stage == 'received'"/>
+                <field name="can_user_confirm_receipt" column_invisible="True"/>
+                <button name="action_confirm_received" string="Confirm Received" type="object"
+                        class="btn-success btn-sm" icon="fa-check-circle"
+                        invisible="transfer_stage != 'in_transit' or not can_user_confirm_receipt"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- In-Transit Action Window -->
+    <record id="action_picking_in_transit" model="ir.actions.act_window">
+        <field name="name">In-Transit Shipments</field>
+        <field name="res_model">stock.picking</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('transfer_stage', '=', 'in_transit')]</field>
+        <field name="view_id" ref="view_picking_tree_in_transit"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No shipments currently in transit!
+            </p>
+            <p>
+                When a main warehouse dispatches goods to other warehouses, they will appear here awaiting receipt confirmation.
+            </p>
+        </field>
+    </record>
+
+    <!-- Menu Item for In-Transit Shipments -->
+    <menuitem id="menu_stock_in_transit"
+              name="In-Transit Receipts"
+              parent="stock.menu_stock_warehouse_mgmt"
+              action="action_picking_in_transit"
+              sequence="5"/>
+</odoo>

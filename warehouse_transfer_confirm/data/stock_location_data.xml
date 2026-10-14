@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="location_inter_warehouse_transit" model="stock.location">
+        <field name="name">Inter-Warehouse Transit</field>
+        <field name="usage">transit</field>
+        <field name="company_id" eval="False"/>
+    </record>
+</odoo>

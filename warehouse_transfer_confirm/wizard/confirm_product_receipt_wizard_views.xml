@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_confirm_product_receipt_wizard_form" model="ir.ui.view">
+        <field name="name">confirm.product.receipt.wizard.form</field>
+        <field name="model">confirm.product.receipt.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Confirm In-Transit Product Receipt">
+                <div class="alert alert-info" role="alert">
+                    <i class="fa fa-info-circle me-1"/>
+                    Confirm that this product has physically arrived. Upon clicking <strong>Confirm Received &amp; Add to Inventory</strong>, the quantity will be added directly into your warehouse's stock.
+                </div>
+                <group>
+                    <group string="Product Details">
+                        <field name="product_id"/>
+                        <label for="quantity_to_receive"/>
+                        <div class="o_row">
+                            <field name="quantity_to_receive"/>
+                            <field name="uom_id"/>
+                        </div>
+                    </group>
+                    <group string="Route &amp; Destination">
+                        <field name="picking_id"/>
+                        <field name="source_warehouse_id"/>
+                        <field name="destination_warehouse_id"/>
+                        <field name="destination_location_id"/>
+                    </group>
+                </group>
+                <footer>
+                    <button name="action_confirm_receipt" string="Confirm Received &amp; Add to Inventory" type="object" class="btn-success" icon="fa-check-circle"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_confirm_product_receipt_wizard" model="ir.actions.act_window">
+        <field name="name">Confirm In-Transit Product Receipt</field>
+        <field name="res_model">confirm.product.receipt.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+</odoo>

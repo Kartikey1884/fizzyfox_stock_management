@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_users_form_warehouse_inherit" model="ir.ui.view">
+        <field name="name">res.users.form.warehouse.inherit</field>
+        <field name="model">res.users</field>
+        <field name="inherit_id" ref="base.view_users_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook" position="inside">
+                <page string="Warehouse Assignment" name="warehouse_assignment">
+                    <group>
+                        <group string="Primary Warehouse">
+                            <field name="warehouse_id" options="{'no_create': True}"/>
+                        </group>
+                        <group string="All Allowed Warehouses">
+                            <field name="allowed_warehouse_ids" widget="many2many_tags" options="{'no_create': True}"/>
+                        </group>
+                    </group>
+                    <div class="text-muted">
+                        <i class="fa fa-info-circle"/> Assign the primary warehouse for this user (e.g., Cafe Store or Restaurant Store). The user will see pending 'Product Received' alerts and incoming transfers for this warehouse.
+                    </div>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>
